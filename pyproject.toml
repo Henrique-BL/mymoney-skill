@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "mymoney"
+version = "0.0.1"
+description = "Alexa and google sheet integration to accessible managment of income and outcome."
+authors = ["Henrique Lucas <henriquelucas15@outlook.com.br>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+pydantic = "^2.7.3"
+pydantic-settings = "^2.3.1"
+pre-commit = "^3.7.1"
+gspread = "^6.1.2"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
