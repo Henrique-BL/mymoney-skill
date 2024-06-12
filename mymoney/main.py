@@ -8,7 +8,8 @@ if __name__ == "__main__":
     controller = GDriveController(client=client)
 
     # Exemplo de uso
-    folder_list = controller.list_folders()
+    folder = controller.searchFolder("Planilhas")
+    controller.newFolder("newFoldere", folder[0]["id"])
+    breakpoint()
 
-    for folder in folder_list:
-        print(folder["name"], "-", folder["id"])
+    print(folder[0]["name"], "-", folder[0]["id"])

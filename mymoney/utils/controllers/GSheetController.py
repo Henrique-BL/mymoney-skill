@@ -1,6 +1,8 @@
 from gspread.spreadsheet import Spreadsheet
 from gspread.worksheet import Worksheet
 from gspread.cell import Cell
+from gspread.client import Client
+
 from mymoney.utils.clients.GspreadClient import GspreadClient
 from mymoney.utils.controllers.MetadataController import MetadataController
 
@@ -25,7 +27,7 @@ class GSheetController:
             # self._spreadsheet.add_worksheet(
                 # str(datetime.datetime.now().month), 100, 20 )
         """
-        self._client = client.getClient()
+        self._client: Client = client.getClient()
         self._spreadsheet: Spreadsheet = self._client.open(spreadsheet)
         # Default worksheet to current month
         self._worksheet: Worksheet = self._spreadsheet.worksheet("6")
