@@ -1,5 +1,4 @@
 from typing import List
-from mymoney.utils.clients.GDriveClient import GDriveClient
 from googleapiclient.errors import HttpError
 from googleapiclient.discovery import Resource
 
@@ -13,7 +12,7 @@ class GDriveController:
         _worksheet: The current worksheet
     """
 
-    def __init__(self, client: GDriveClient) -> None:
+    def __init__(self, client: Resource) -> None:
         """
         Initializes the SheetController with the specified
         spreadsheet name and GspreadClient.
@@ -22,7 +21,7 @@ class GDriveController:
             spreadsheet (str): The name of the spreadsheet.
             client (GspreadClient): The client to interact with Google Sheets.
         """
-        self._client: Resource = client.getClient()
+        self._client: Resource = client
 
     def listFolders(self) -> List:
         folders = []
@@ -92,12 +91,13 @@ class GDriveController:
         :param name: The name of the folder to search for.
         :return: A list of folder metadata that match the search query.
         """
-        query = f"""name = '{name}' and
-        "mimeType = 'application/vnd.google-apps.folder' and trashed = false"""
+        query = f"name = '{name}' and mimeType =\
+                 'application/vnd.google-apps.folder' and trashed = false"
         try:
             results = (
                 self._client.files().list(q=query, fields="files(id, name)").execute()
             )
+
             folders = results.get("files", [])
             return folders
         except HttpError as error:

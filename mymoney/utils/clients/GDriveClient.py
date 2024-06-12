@@ -4,6 +4,7 @@ from googleapiclient.discovery import build, Resource
 import ast
 from dotenv import load_dotenv
 
+
 load_dotenv()
 
 
@@ -15,12 +16,9 @@ class GDriveClient:
         self._creds: Credentials = Credentials.from_service_account_file(
             filename=self._path, scopes=self._scopes
         )
-        self._client: Resource = build(
-            serviceName="drive", version="v3", credentials=self._creds
-        )
 
-    def getClient(self):
-        return self._client
+    async def getClient(self) -> Resource:
+        return build(serviceName="drive", version="v3", credentials=self._creds)
 
 
 client = GDriveClient()
