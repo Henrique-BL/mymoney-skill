@@ -1,11 +1,14 @@
-from mymoney.utils.SheetController import SheetController
-from mymoney.utils.GspreadClient import client
+from mymoney.utils.controllers.GDriveController import GDriveController
+from mymoney.utils.clients.GDriveClient import client
 
+from dotenv import load_dotenv
 
+load_dotenv()
 if __name__ == "__main__":
-    controller = SheetController("test_sheet", client)
-    # controller.initialize()
-    controller.insertCell(data=200, column="Debit Card", type="Outome")
-    cell = controller.searchCell(row=3, col=1)
+    controller = GDriveController(client=client)
 
-    controller.deleteLastCell("Money")
+    # Exemplo de uso
+    folder_list = controller.list_folders()
+
+    for folder in folder_list:
+        print(folder["name"], "-", folder["id"])

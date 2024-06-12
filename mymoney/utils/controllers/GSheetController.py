@@ -1,18 +1,17 @@
-import datetime
-import json
 from gspread.spreadsheet import Spreadsheet
 from gspread.worksheet import Worksheet
 from gspread.cell import Cell
-from mymoney.utils.GspreadClient import GspreadClient
+from mymoney.utils.clients.GspreadClient import GspreadClient
+from mymoney.utils.controllers.MetadataController import MetadataController
 
 
-class SheetController:
+class GSheetController:
     """
 
     Attributes:
         _client: The client for interacting with Google Sheets.
         _spreadsheet: The spreadsheet object.
-        _worksheet: The worksheet for the current month.
+        _worksheet: The current worksheet
     """
 
     def __init__(self, spreadsheet: str, client: GspreadClient) -> None:
@@ -23,13 +22,14 @@ class SheetController:
         Args:
             spreadsheet (str): The name of the spreadsheet.
             client (GspreadClient): The client to interact with Google Sheets.
+            # self._spreadsheet.add_worksheet(
+                # str(datetime.datetime.now().month), 100, 20 )
         """
         self._client = client.getClient()
         self._spreadsheet: Spreadsheet = self._client.open(spreadsheet)
         # Default worksheet to current month
-        self._worksheet: Worksheet = self._spreadsheet.add_worksheet(
-            str(datetime.datetime.now().month), 100, 20
-        )
+        self._worksheet: Worksheet = self._spreadsheet.worksheet("6")
+        # self._spreadsheet.worksheet("6")#
 
     def initialize(self) -> bool:
         """
@@ -38,43 +38,20 @@ class SheetController:
         Returns:
             bool: True if initialization is successful.
         """
-        self.defineMetadata()
+        MetadataController.defineMetadata(worksheet=self._worksheet)
+
         self.defineHeaders()
 
-        metadata = self.getMetadata()
+        metadata = MetadataController.getMetadata(worksheet=self._worksheet)
         metadata["Created"] = True
-        self.updateMetadata(metadata=metadata, type=None, value=None)
+
+        MetadataController.updateMetadata(
+            worksheet=self._worksheet, metadata=metadata, type=None, value=None
+        )
 
         return True
 
-    def getMetadata(self) -> dict:
-        """
-        Retrieves metadata from the first cell (A1) and converts it to a dictionary.
-
-        Returns:
-            dict: The metadata dictionary.
-        """
-        data = self._worksheet.acell("A1").value
-        metadata = json.loads(data)
-        return metadata
-
-    def defineMetadata(self):
-        """
-        Initializes the metadata with default values for various financial columns.
-        """
-        metadata = {
-            "Money": {"index": 1, "last": 3},
-            "Debit Card": {"index": 3, "last": 3},
-            "Credit Card": {"index": 5, "last": 3},
-            "Bank Transfer": {"index": 7, "last": 3},
-            "Pix": {"index": 9, "last": 3},
-            "Income": 0,
-            "Outcome": 0,
-            "Created": False,
-        }
-        self._worksheet.update_acell("A1", json.dumps(metadata))
-
-    def defineHeaders(self):
+    def defineHeaders(self) -> None:
         """
         Defines the headers for the spreadsheet if they are not already present.
         """
@@ -90,26 +67,11 @@ class SheetController:
             "Pix",
             "Type",
         ]
+        # Verify if headers already exist
         if not headers == self._worksheet.row_values(2):
             self._worksheet.insert_row(headers, 2)
         else:
             print("\n Exception: Header already defined")
-
-    def updateMetadata(self, metadata: dict, type: str | None, value: float | None):
-        """
-        Updates the metadata in cell A1 after insert, update, or delete actions.
-
-        Args:
-            metadata (dict): The metadata dictionary.
-            type (str | None): The type of transaction ("Income" or "Outcome").
-            value (float | None): The transaction amount.
-        """
-        if type == "Income":
-            metadata["Income"] += value
-        elif type == "Outcome":
-            metadata["Outcome"] += value
-
-        self._worksheet.update_acell("A1", json.dumps(metadata))
 
     def insertCell(self, data: float, type: str, column: str) -> Cell:
         """
@@ -123,7 +85,7 @@ class SheetController:
         Returns:
             Cell: The inserted cell.
         """
-        metadata = self.getMetadata()
+        metadata = MetadataController.getMetadata(self._worksheet)
         col: dict = metadata.get(column)
         row = col.get("last")
 
@@ -133,7 +95,9 @@ class SheetController:
         cell = self.searchCell(row=row, col=col.get("index"))
 
         col["last"] = row + 1
-        self.updateMetadata(metadata=metadata, type=type, value=data)
+        MetadataController.updateMetadata(
+            worksheet=self._worksheet, metadata=metadata, type=type, value=data
+        )
 
         return cell
 
@@ -144,7 +108,7 @@ class SheetController:
         Args:
             column (str): The column name (e.g., "Money", "Pix").
         """
-        metadata = self.getMetadata()
+        metadata = MetadataController.getMetadata(self._worksheet)
         col: dict = metadata.get(column)
         row = col.get("last")
 
@@ -158,7 +122,9 @@ class SheetController:
         type_cell.value = ""
 
         self._worksheet.update_cells([cell, type_cell])
-        self.updateMetadata(metadata=metadata, type=None, value=None)
+        MetadataController.updateMetadata(
+            worksheet=self._worksheet, metadata=metadata, type=None, value=None
+        )
 
     def searchCell(self, row: int, col: int) -> Cell:
         """
