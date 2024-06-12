@@ -2,9 +2,10 @@ from gspread.spreadsheet import Spreadsheet
 from gspread.worksheet import Worksheet
 from gspread.cell import Cell
 from gspread.client import Client
-
-from mymoney.utils.clients.GspreadClient import GspreadClient
+from mymoney.contrib import settings
 from mymoney.utils.controllers.MetadataController import MetadataController
+
+import datetime
 
 
 class GSheetController:
@@ -16,7 +17,7 @@ class GSheetController:
         _worksheet: The current worksheet
     """
 
-    def __init__(self, spreadsheet: str, client: GspreadClient) -> None:
+    def __init__(self, spreadsheet: str, client: Client) -> None:
         """
         Initializes the SheetController with the specified
         spreadsheet name and GspreadClient.
@@ -24,14 +25,14 @@ class GSheetController:
         Args:
             spreadsheet (str): The name of the spreadsheet.
             client (GspreadClient): The client to interact with Google Sheets.
-            # self._spreadsheet.add_worksheet(
-                # str(datetime.datetime.now().month), 100, 20 )
+
         """
-        self._client: Client = client.getClient()
+        self._client: Client = client
         self._spreadsheet: Spreadsheet = self._client.open(spreadsheet)
         # Default worksheet to current month
-        self._worksheet: Worksheet = self._spreadsheet.worksheet("6")
-        # self._spreadsheet.worksheet("6")#
+        self._worksheet: Worksheet = self._spreadsheet.add_worksheet(
+            str(datetime.datetime.now().month), 100, 20
+        )
 
     def initialize(self) -> bool:
         """
@@ -57,21 +58,10 @@ class GSheetController:
         """
         Defines the headers for the spreadsheet if they are not already present.
         """
-        headers = [
-            "Money",
-            "Type",
-            "Debit Card",
-            "Type",
-            "Credit Card",
-            "Type",
-            "Bank Transfer",
-            "Type",
-            "Pix",
-            "Type",
-        ]
+        headers = settings.HEADERS
         # Verify if headers already exist
-        if not headers == self._worksheet.row_values(2):
-            self._worksheet.insert_row(headers, 2)
+        if not headers == self._worksheet.row_values(settings.HEADERS_DEFAULT_ROW):
+            self._worksheet.insert_row(headers, settings.HEADERS_DEFAULT_ROW)
         else:
             print("\n Exception: Header already defined")
 
@@ -118,7 +108,11 @@ class GSheetController:
         type_cell = self.searchCell(row=row - 1, col=cell.col + 1)
 
         metadata[type_cell.value] -= cell.numeric_value
-        col["last"] = col["last"] - 1 if col["last"] > 3 else 3
+        col["last"] = (
+            col["last"] - 1
+            if col["last"] > settings.DATA_ROW_DEFAULT
+            else settings.DATA_ROW_DEFAULT
+        )
 
         cell.value = ""
         type_cell.value = ""

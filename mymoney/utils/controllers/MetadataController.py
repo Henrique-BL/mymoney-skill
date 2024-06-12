@@ -1,5 +1,6 @@
 import json
 from gspread.worksheet import Worksheet
+from mymoney.contrib import settings
 
 
 class MetadataController:
@@ -9,16 +10,25 @@ class MetadataController:
         Initializes the metadata with default values for various financial columns.
         """
         metadata = {
-            "Money": {"index": 1, "last": 3},
-            "Debit Card": {"index": 3, "last": 3},
-            "Credit Card": {"index": 5, "last": 3},
-            "Bank Transfer": {"index": 7, "last": 3},
-            "Pix": {"index": 9, "last": 3},
-            "Income": 0,
-            "Outcome": 0,
-            "Created": False,
+            "Money": {"index": settings.MONEY_COL, "last": settings.DATA_ROW_DEFAULT},
+            "Debit Card": {
+                "index": settings.DEBIT_COL,
+                "last": settings.DATA_ROW_DEFAULT,
+            },
+            "Credit Card": {
+                "index": settings.CREDIT_COL,
+                "last": settings.DATA_ROW_DEFAULT,
+            },
+            "Bank Transfer": {
+                "index": settings.BANK_COL,
+                "last": settings.DATA_ROW_DEFAULT,
+            },
+            "Pix": {"index": settings.PIX_COL, "last": settings.DATA_ROW_DEFAULT},
+            "Income": settings.INCOME_DEFAULT,
+            "Outcome": settings.OUTCOME_DEFAULT,
+            "Created": settings.CREATED_DEFAULT,
         }
-        worksheet.update_acell("A1", json.dumps(metadata))
+        worksheet.update_acell(settings.METADATA_DEFAULT_INDEX, json.dumps(metadata))
 
     @staticmethod
     def getMetadata(worksheet: Worksheet) -> dict:
@@ -28,7 +38,7 @@ class MetadataController:
         Returns:
             dict: The metadata dictionary.
         """
-        data = worksheet.acell("A1").value
+        data = worksheet.acell(settings.METADATA_DEFAULT_INDEX).value
         metadata = json.loads(data)
         return metadata
 
@@ -50,4 +60,4 @@ class MetadataController:
         elif type == "Outcome":
             metadata["Outcome"] += value
 
-        worksheet.update_acell("A1", json.dumps(metadata))
+        worksheet.update_acell(settings.METADATA_DEFAULT_INDEX, json.dumps(metadata))

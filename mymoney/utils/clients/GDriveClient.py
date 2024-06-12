@@ -17,7 +17,7 @@ class GDriveClient:
             filename=self._path, scopes=self._scopes
         )
 
-    async def getClient(self) -> Resource:
+    def getClient(self) -> Resource:
         return build(serviceName="drive", version="v3", credentials=self._creds)
 
 
