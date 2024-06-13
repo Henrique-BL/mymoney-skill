@@ -11,15 +11,17 @@ if __name__ == "__main__":
     gspread = gspread_client.getClient()
 
     drive_controller = GDriveController(client=gdrive)
-    sheet_controller = GSheetController("test_sheet", client=gspread)
-    print(
-        drive_controller.listFiles(
-            folder_id=drive_controller.searchFolder("Relatorios")[0]["id"]
-        )
-    )
+    sheet_controller = GSheetController(client=gspread)
 
+    folder_id = drive_controller.searchFolder("Relatorios")[0]["id"]
 
-"""  breakpoint()
+    # drive_controller.shareFolder("Relatorios")
+    sheet_controller.deleteSpreadsheet(title="newSpreaad", folder_id=folder_id)
+
+    print(gspread.list_spreadsheet_files())
+
+"""
+    breakpoint()
     sheet_controller.initialize()
     sheet_controller.insertCell(40, "Outcome", "Money")
     sheet_controller.insertCell(40, "Outcome", "Money")

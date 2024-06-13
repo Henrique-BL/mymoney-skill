@@ -1,9 +1,8 @@
 from gspread.spreadsheet import Spreadsheet
-from gspread.worksheet import Worksheet
 from gspread.cell import Cell
 from gspread.client import Client
-from gspread.exceptions import WorksheetNotFound
 from mymoney.contrib import settings
+from mymoney.utils.controllers.SpreadsheetController import SpreadsheetController
 from mymoney.utils.controllers.MetadataController import MetadataController
 
 
@@ -16,7 +15,7 @@ class GSheetController:
         _worksheet: The current worksheet
     """
 
-    def __init__(self, spreadsheet: str, client: Client) -> None:
+    def __init__(self, client: Client) -> None:
         """
         Initializes the SheetController with the specified
         spreadsheet name and GspreadClient.
@@ -27,16 +26,16 @@ class GSheetController:
 
         """
         self._client: Client = client
-        self._spreadsheet: Spreadsheet = self._client.open(spreadsheet)
+        self._spreadsheet: None
         # Default worksheet to current month
-        try:
+        """        try:
             self._worksheet: Worksheet = self._spreadsheet.worksheet(
                 settings.CURRENT_MONTH
             )
         except WorksheetNotFound:
             self._worksheet: Worksheet = self._spreadsheet.add_worksheet(
                 settings.CURRENT_MONTH
-            )
+            )"""
 
     def initialize(self) -> bool:
         """
@@ -57,6 +56,9 @@ class GSheetController:
         )
 
         return True
+
+    def setSpreadsheet(self, spreadsheet: Spreadsheet):
+        self._spreadsheet = spreadsheet
 
     def defineHeaders(self) -> None:
         """
@@ -139,3 +141,15 @@ class GSheetController:
         """
         cell: Cell = self._worksheet.cell(row=row, col=col)
         return cell
+
+    def newSpreadsheet(self, title: str, folder_id: str) -> str:
+        id = SpreadsheetController.createSpreadsheet(
+            gspread=self._client, title=title, folder_id=folder_id
+        )
+        return id
+
+    def deleteSpreadsheet(self, title: str, folder_id: str) -> str:
+        id = SpreadsheetController.deleteSpreadsheet(
+            gspread=self._client, title=title, folder_id=folder_id
+        )
+        return id
