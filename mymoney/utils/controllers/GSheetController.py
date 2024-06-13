@@ -139,7 +139,3 @@ class GSheetController:
         """
         cell: Cell = self._worksheet.cell(row=row, col=col)
         return cell
-
-    def newSheet(self, title: str, folder_id) -> str:
-        spreadsheet = self._client.create(title=title, folder_id=folder_id)
-        return spreadsheet.id
