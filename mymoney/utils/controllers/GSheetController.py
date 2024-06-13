@@ -2,10 +2,9 @@ from gspread.spreadsheet import Spreadsheet
 from gspread.worksheet import Worksheet
 from gspread.cell import Cell
 from gspread.client import Client
+from gspread.exceptions import WorksheetNotFound
 from mymoney.contrib import settings
 from mymoney.utils.controllers.MetadataController import MetadataController
-
-import datetime
 
 
 class GSheetController:
@@ -30,9 +29,14 @@ class GSheetController:
         self._client: Client = client
         self._spreadsheet: Spreadsheet = self._client.open(spreadsheet)
         # Default worksheet to current month
-        self._worksheet: Worksheet = self._spreadsheet.add_worksheet(
-            str(datetime.datetime.now().month), 100, 20
-        )
+        try:
+            self._worksheet: Worksheet = self._spreadsheet.worksheet(
+                settings.CURRENT_MONTH
+            )
+        except WorksheetNotFound:
+            self._worksheet: Worksheet = self._spreadsheet.add_worksheet(
+                settings.CURRENT_MONTH
+            )
 
     def initialize(self) -> bool:
         """
@@ -135,3 +139,7 @@ class GSheetController:
         """
         cell: Cell = self._worksheet.cell(row=row, col=col)
         return cell
+
+    def newSheet(self, title: str, folder_id) -> str:
+        spreadsheet = self._client.create(title=title, folder_id=folder_id)
+        return spreadsheet.id

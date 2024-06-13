@@ -1,3 +1,6 @@
+import datetime
+
+
 METADATA_DEFAULT_INDEX = "A1"  # Define the cell where metadata will be found
 HEADERS_DEFAULT_ROW = 2  # Initial row position of headers
 
@@ -30,3 +33,6 @@ OUTCOME_DEFAULT = 0
 
 # Status of creation
 CREATED_DEFAULT = False
+
+# Current month
+CURRENT_MONTH = str(datetime.datetime.now().month)

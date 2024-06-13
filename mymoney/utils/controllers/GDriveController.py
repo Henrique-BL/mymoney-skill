@@ -1,6 +1,10 @@
+import os
 from typing import List
 from googleapiclient.errors import HttpError
 from googleapiclient.discovery import Resource
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 class GDriveController:
@@ -143,3 +147,25 @@ class GDriveController:
         except HttpError as error:
             print(f"An error occurred: {error}")
             return None
+
+    def shareFolder(
+        self,
+        folder_title: str,
+        email_address: str = os.environ.get("GSHEET_SERVICE_ACCOUNT_EMAIL"),
+    ):
+        folder_id = self.searchFolder(folder_title)[0]["id"]
+        try:
+            permission = {
+                "type": "user",
+                "role": "writer",
+                "emailAddress": email_address,
+            }
+            self._client.permissions().create(
+                fileId=folder_id,
+                body=permission,
+                fields="id",
+            ).execute()
+
+            return folder_id
+        except HttpError as error:
+            print(f"An error occurred: {error}")
