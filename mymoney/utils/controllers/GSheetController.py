@@ -1,6 +1,8 @@
 from gspread.spreadsheet import Spreadsheet
 from gspread.cell import Cell
 from gspread.client import Client
+from gspread.worksheet import Worksheet
+from gspread.exceptions import WorksheetNotFound
 from mymoney.contrib import settings
 from mymoney.utils.controllers.SpreadsheetController import SpreadsheetController
 from mymoney.utils.controllers.MetadataController import MetadataController
@@ -26,16 +28,16 @@ class GSheetController:
 
         """
         self._client: Client = client
-        self._spreadsheet: None
+        self._spreadsheet: Spreadsheet = None
         # Default worksheet to current month
-        """        try:
+        try:
             self._worksheet: Worksheet = self._spreadsheet.worksheet(
                 settings.CURRENT_MONTH
             )
         except WorksheetNotFound:
             self._worksheet: Worksheet = self._spreadsheet.add_worksheet(
                 settings.CURRENT_MONTH
-            )"""
+            )
 
     def initialize(self) -> bool:
         """
@@ -143,13 +145,50 @@ class GSheetController:
         return cell
 
     def newSpreadsheet(self, title: str, folder_id: str) -> str:
+        """
+        Creates a spreadsheet at given folder.
+
+        Args:
+            title (str): The spreadsheet title.
+            folder_id (str): The destination folder_id number.
+
+        Returns:
+            id: The id of the created spreadsheet.
+        """
         id = SpreadsheetController.createSpreadsheet(
             gspread=self._client, title=title, folder_id=folder_id
         )
         return id
 
     def deleteSpreadsheet(self, title: str, folder_id: str) -> str:
+        """
+        Deletes a spreadsheet at given folder.
+
+        Args:
+            title (str): The spreadsheet title.
+            folder_id (str): The destination folder_id number.
+
+        Returns:
+            id: The id of the deleted spreadsheet.
+        """
         id = SpreadsheetController.deleteSpreadsheet(
             gspread=self._client, title=title, folder_id=folder_id
+        )
+        return id
+
+    def updateSpreadsheet(self, title: str, new_title: str, folder_id: str) -> str:
+        """
+        Updates the name of a spreadsheet at given folder.
+
+        Args:
+            title (str): The spreadsheet title.
+            new_title (str): The spreadsheet new title.
+            folder_id (str): The destination folder_id number.
+
+        Returns:
+            id: The id of the updated spreadsheet.
+        """
+        id = SpreadsheetController.updateSpreadsheet(
+            gspread=self._client, title=title, new_title=new_title, folder_id=folder_id
         )
         return id

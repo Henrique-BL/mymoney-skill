@@ -6,14 +6,14 @@ class BaseExcpetion(Exception):
         return self._message
 
 
-class FolderAlreadyExistsException(BaseException):
-    def __init__(self, folder_name: str) -> None:
-        self.message = f"Folder {folder_name} already exists in current directory,\
+class FileAlreadyExistsException(BaseException):
+    def __init__(self, file_name: str) -> None:
+        self.message = f"File {file_name} already exists in current directory,\
         try another title."
         super().__init__(self.message)
 
 
-class FolderNotFoundException(BaseException):
-    def __init__(self, folder_id) -> None:
-        self.message = f"Folder not found with given id. ID: {folder_id}."
+class FileNotFoundException(BaseException):
+    def __init__(self, file_id) -> None:
+        self.message = f"File not found with given id. ID: {file_id}."
         super().__init__(self.message)

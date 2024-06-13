@@ -15,10 +15,6 @@ if __name__ == "__main__":
 
     folder_id = drive_controller.searchFolder("Relatorios")[0]["id"]
 
-    # drive_controller.shareFolder("Relatorios")
-    sheet_controller.deleteSpreadsheet(title="newSpreaad", folder_id=folder_id)
-
-    print(gspread.list_spreadsheet_files())
 
 """
     breakpoint()
