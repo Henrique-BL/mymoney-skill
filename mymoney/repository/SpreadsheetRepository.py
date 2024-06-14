@@ -2,15 +2,18 @@ from gspread.spreadsheet import Spreadsheet
 from gspread.client import Client
 from gspread.exceptions import SpreadsheetNotFound
 
+from mymoney.repository.WorksheetRepository import WorksheetRepository
 from mymoney.utils.exceptions.Exceptions import (
     FileAlreadyExistsException,
     FileNotFoundException,
 )
 
 
-class SpreadsheetController:
-    @staticmethod
-    def createSpreadsheet(gspread: Client, title: str, folder_id: str) -> str:
+class SpreadsheetRepository(WorksheetRepository):
+    def __init__(self, client: Client) -> None:
+        super().__init__(client)
+
+    def _createSpreadsheet(self, title: str, folder_id: str) -> str:
         """
         Creates a new Spreasheet in the folder passed as parameter
 
@@ -23,25 +26,15 @@ class SpreadsheetController:
             str: The id of the inserted spreasheet
             None: if spreadsheet with given title already exists in the folder
         """
+        if self.searchSpreadsheet(identifier=title, folder_id=folder_id) is not None:
+            raise FileAlreadyExistsException(folder_id)
 
-        try:
-            if (
-                SpreadsheetController.searchSpreadsheet(
-                    gspread=gspread, identifier=title, folder_id=folder_id
-                )
-                is not None
-            ):
-                raise FileAlreadyExistsException(folder_id)
+        spreadsheet: Spreadsheet = self._client.create(title=title, folder_id=folder_id)
 
-            spreadsheet: Spreadsheet = gspread.create(title=title, folder_id=folder_id)
+        return spreadsheet.id
 
-            return spreadsheet.id
-        except FileAlreadyExistsException as error:
-            print(error)
-            return None
-
-    def searchSpreadsheet(
-        gspread: Client, identifier: str, folder_id: str, search_by: str = "title"
+    def _searchSpreadsheet(
+        self, identifier: str, folder_id: str, search_by: str = "title"
     ) -> Spreadsheet:
         """
         Search for a  Spreasheet in the folder passed as parameter
@@ -62,19 +55,18 @@ class SpreadsheetController:
 
         try:
             if search_by == "title":
-                spreadsheet: Spreadsheet = gspread.open(
+                spreadsheet: Spreadsheet = self._client.open(
                     title=identifier, folder_id=folder_id
                 )
 
             else:
-                spreadsheet: Spreadsheet = gspread.open_by_key(id=identifier)
+                spreadsheet: Spreadsheet = self._client.open_by_key(key=identifier)
 
             return spreadsheet
-        except SpreadsheetNotFound as error:
-            print(f"Spreadsheet not found. Error: {error}")
+        except SpreadsheetNotFound:
             return None
 
-    def deleteSpreadsheet(gspread: Client, title: str, folder_id: str) -> str:
+    def _deleteSpreadsheet(self, title: str, folder_id: str) -> str:
         """
         Remove a Spreasheet in the folder passed as parameter
 
@@ -88,25 +80,18 @@ class SpreadsheetController:
             None: If spreadsheet with given title does'nt exists in the folder
         """
 
-        try:
-            spreadsheet: Spreadsheet = SpreadsheetController.searchSpreadsheet(
-                gspread=gspread, identifier=title, folder_id=folder_id
-            )
+        spreadsheet: Spreadsheet = self.searchSpreadsheet(
+            identifier=title, folder_id=folder_id
+        )
 
-            if spreadsheet is not None:
-                gspread.del_spreadsheet(file_id=spreadsheet.id)
-                return spreadsheet.id
+        if spreadsheet is not None:
+            self._client.del_spreadsheet(file_id=spreadsheet.id)
+            return spreadsheet.id
 
-            else:
-                raise FileNotFoundException(file_id=title)
+        else:
+            raise FileNotFoundException(file_id=title)
 
-        except FileNotFoundException as error:
-            print(error)
-            return None
-
-    def updateSpreadsheet(
-        gspread: Client, title: str, new_title: str, folder_id: str
-    ) -> str:
+    def _updateSpreadsheet(self, title: str, new_title: str, folder_id: str) -> str:
         """
         Update the name of a Spreasheet in the folder passed as parameter
 
@@ -121,28 +106,20 @@ class SpreadsheetController:
             str: The id of the inserted spreasheet
             None: If spreadsheet with given title does'nt exists in the folder
         """
-        try:
-            spreadsheet: Spreadsheet = SpreadsheetController.searchSpreadsheet(
-                gspread=gspread, identifier=new_title, folder_id=folder_id
-            )
 
-            if spreadsheet is not None:
-                raise FileAlreadyExistsException(new_title)
+        spreadsheet: Spreadsheet = self.searchSpreadsheet(
+            identifier=new_title, folder_id=folder_id
+        )
 
-            spreadsheet: Spreadsheet = SpreadsheetController.searchSpreadsheet(
-                gspread=gspread, identifier=title, folder_id=folder_id
+        if spreadsheet is None:
+            spreadsheet: Spreadsheet = self.searchSpreadsheet(
+                identifier=title, folder_id=folder_id
             )
 
             if spreadsheet is not None:
                 spreadsheet.update_title(new_title)
                 return spreadsheet.id
-
             else:
                 raise FileNotFoundException(file_id=title)
-
-        except FileNotFoundException as error:
-            print(error)
-            return None
-        except FileAlreadyExistsException as error:
-            print(error)
-            return None
+        else:
+            raise FileAlreadyExistsException(new_title)

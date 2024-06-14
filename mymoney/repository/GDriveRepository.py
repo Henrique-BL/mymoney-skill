@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
-class GDriveController:
+class GDriveRepository:
     """
 
     Attributes:
@@ -41,7 +41,7 @@ class GDriveController:
         """
 
         if self.searchFolder(identifier=name):
-            raise FileAlreadyExistsException(folder_name=name)
+            raise FileAlreadyExistsException(name)
 
         folder_metadata = {
             "name": name,
@@ -92,7 +92,7 @@ class GDriveController:
         """
 
         if not self.searchFolder(identifier=folder_id, search_by="id"):
-            raise FileNotFoundException(folder_id == folder_id)
+            raise FileNotFoundException(folder_id)
 
         try:
             self._client.files().delete(fileId=folder_id).execute()
