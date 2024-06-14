@@ -1,7 +1,11 @@
 from gspread.spreadsheet import Spreadsheet
 from gspread.client import Client
+from gspread.worksheet import Worksheet
+from gspread.cell import Cell
 from gspread.exceptions import SpreadsheetNotFound
+
 from mymoney.repository.SpreadsheetRepository import SpreadsheetRepository
+from mymoney.repository.WorksheetRepository import WorksheetRepository
 from mymoney.utils.exceptions.Exceptions import (
     FileAlreadyExistsException,
     FileNotFoundException,
@@ -28,9 +32,18 @@ class GSheetService:
 
         """
         self._client: Client = client
-        self._service: SpreadsheetRepository = SpreadsheetRepository(client=client)
 
-    def newSpreadsheet(self, title: str, folder_id: str) -> str:
+        self._spreadsheet: SpreadsheetRepository = SpreadsheetRepository(client=client)
+        self._worksheet: WorksheetRepository = None
+        self._currentSpreadsheet: Spreadsheet = None
+
+    def _setCurrentSpreadsheet(self, spreadsheet: Spreadsheet) -> None:
+        self._currentSpreadsheet = spreadsheet
+
+    def _setWorksheet(self, worksheet: Worksheet) -> None:
+        self._worksheet = WorksheetRepository(self._client, worksheet)
+
+    def _newSpreadsheet(self, title: str, folder_id: str) -> str:
         """
         Creates a spreadsheet at given folder.
 
@@ -42,13 +55,22 @@ class GSheetService:
             id: The id of the created spreadsheet.
         """
         try:
-            id = self._service._createSpreadsheet(title=title, folder_id=folder_id)
+            id: str = self._spreadsheet._createSpreadsheet(
+                title=title, folder_id=folder_id
+            )
+
+            default_spreadsheet: Spreadsheet = self._searchSpreadSheet(
+                identifier=id, folder_id=folder_id, search_by="id"
+            )
+            default_worksheet: Worksheet = default_spreadsheet.sheet1
+
+            self._setWorksheet(default_worksheet)
             return id
         except FileAlreadyExistsException as error:
             print(error)
             return None
 
-    def deleteSpreadsheet(self, title: str, folder_id: str) -> str:
+    def _deleteSpreadsheet(self, title: str, folder_id: str) -> str:
         """
         Deletes a spreadsheet at given folder.
 
@@ -60,13 +82,15 @@ class GSheetService:
             id: The id of the deleted spreadsheet.
         """
         try:
-            id = self._service._deleteSpreadsheet(title=title, folder_id=folder_id)
+            id: str = self._spreadsheet._deleteSpreadsheet(
+                title=title, folder_id=folder_id
+            )
             return id
         except FileNotFoundException() as erro:
             print(erro)
             return None
 
-    def updateSpreadsheet(self, title: str, new_title: str, folder_id: str) -> str:
+    def _updateSpreadsheet(self, title: str, new_title: str, folder_id: str) -> str:
         """
         Updates the name of a spreadsheet at given folder.
 
@@ -79,7 +103,7 @@ class GSheetService:
             id: The id of the updated spreadsheet.
         """
         try:
-            id = self._service._updateSpreadsheet(
+            id: str = self._spreadsheet._updateSpreadsheet(
                 title=title, new_title=new_title, folder_id=folder_id
             )
             return id
@@ -90,7 +114,7 @@ class GSheetService:
             print(error)
             return None
 
-    def searchSpreadSheet(
+    def _searchSpreadSheet(
         self, identifier: str, folder_id: str, search_by: str = "title"
     ) -> Spreadsheet:
         """
@@ -104,9 +128,12 @@ class GSheetService:
             Spreadsheet: The gspread.Spreadsheet
         """
         try:
-            spreadsheet: Spreadsheet = self._service._searchSpreadsheet(
+            spreadsheet: Spreadsheet = self._spreadsheet._searchSpreadsheet(
                 identifier=identifier, folder_id=folder_id, search_by=search_by
             )
+
+            if spreadsheet is None:
+                raise SpreadsheetNotFound()
             return spreadsheet
         except SpreadsheetNotFound as error:
             print(f"Spreadsheet not found. Error: {error}")
@@ -114,3 +141,43 @@ class GSheetService:
         except ValueError as error:
             print(error)
             return None
+
+    def _insertCell(self, data: float, type: str, column: str) -> Cell:
+        """
+        Inserts a new cell with data and updates the corresponding type cell.
+
+        Args:
+            data (float): The financial data to insert.
+            type (str): The type of transaction ("Income" or "Outcome").
+            column (str): The column name (e.g., "Money", "Pix").
+
+        Returns:
+            Cell: The inserted cell.
+        """
+
+        return self._insertCell(data, type, column)
+
+        # Worksheet Services Methods
+
+    def _searchCell(self, row: int, col: int) -> Cell | None:
+        """
+        Searches for a cell at the specified row and column.
+
+        Args:
+            row (int): The row number.
+            col (int): The column number.
+
+        Returns:
+            Cell: The cell object.
+            None: Cell empty
+        """
+        return self._worksheet._searchCell(row=row, col=col)
+
+    def _deleteLastCell(self, column: str) -> None:
+        """
+        Deletes the last cell in the specified column and updates metadata.
+
+        Args:
+            column (str): The column name (e.g., "Money", "Pix").
+        """
+        self._worksheet._deleteLastCell(column)

@@ -2,9 +2,6 @@ import os
 import gspread
 
 from gspread.client import Client
-from dotenv import load_dotenv
-
-load_dotenv()
 
 
 class GspreadClient:

@@ -11,3 +11,4 @@ class BaseRepository:
 
     def __init__(self, client: Client) -> None:
         self._client: Client = client
+        self.nome = "aaa"

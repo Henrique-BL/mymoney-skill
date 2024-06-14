@@ -1,15 +1,14 @@
 from gspread.spreadsheet import Spreadsheet
 from gspread.client import Client
-from gspread.exceptions import SpreadsheetNotFound
-
-from mymoney.repository.WorksheetRepository import WorksheetRepository
+from mymoney.repository.BaseRepository import BaseRepository
 from mymoney.utils.exceptions.Exceptions import (
     FileAlreadyExistsException,
     FileNotFoundException,
 )
+from gspread.exceptions import SpreadsheetNotFound
 
 
-class SpreadsheetRepository(WorksheetRepository):
+class SpreadsheetRepository(BaseRepository):
     def __init__(self, client: Client) -> None:
         super().__init__(client)
 
@@ -26,8 +25,8 @@ class SpreadsheetRepository(WorksheetRepository):
             str: The id of the inserted spreasheet
             None: if spreadsheet with given title already exists in the folder
         """
-        if self.searchSpreadsheet(identifier=title, folder_id=folder_id) is not None:
-            raise FileAlreadyExistsException(folder_id)
+        if self._searchSpreadsheet(identifier=title, folder_id=folder_id) is not None:
+            raise FileAlreadyExistsException(title)
 
         spreadsheet: Spreadsheet = self._client.create(title=title, folder_id=folder_id)
 
@@ -80,7 +79,7 @@ class SpreadsheetRepository(WorksheetRepository):
             None: If spreadsheet with given title does'nt exists in the folder
         """
 
-        spreadsheet: Spreadsheet = self.searchSpreadsheet(
+        spreadsheet: Spreadsheet = self._searchSpreadsheet(
             identifier=title, folder_id=folder_id
         )
 
@@ -107,12 +106,12 @@ class SpreadsheetRepository(WorksheetRepository):
             None: If spreadsheet with given title does'nt exists in the folder
         """
 
-        spreadsheet: Spreadsheet = self.searchSpreadsheet(
+        spreadsheet: Spreadsheet = self._searchSpreadsheet(
             identifier=new_title, folder_id=folder_id
         )
 
         if spreadsheet is None:
-            spreadsheet: Spreadsheet = self.searchSpreadsheet(
+            spreadsheet: Spreadsheet = self._searchSpreadsheet(
                 identifier=title, folder_id=folder_id
             )
 

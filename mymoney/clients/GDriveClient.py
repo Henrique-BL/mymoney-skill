@@ -2,10 +2,6 @@ import os
 from google.oauth2.service_account import Credentials
 from googleapiclient.discovery import build, Resource
 import ast
-from dotenv import load_dotenv
-
-
-load_dotenv()
 
 
 class GDriveClient:

@@ -69,6 +69,10 @@ class GDriveRepository:
         :param new_name: The new name for the folder.
         :return: The metadata of the updated folder.
         """
+
+        if self.searchFolder(identifier=new_name):
+            raise FileAlreadyExistsException(new_name)
+
         if not self.searchFolder(identifier=folder_id, search_by="id"):
             raise FileNotFoundException(folder_id)
 
@@ -132,12 +136,12 @@ class GDriveRepository:
                 ):
                     folders = [file]
                 else:
-                    folders = []
+                    folders = None
 
             return folders
         except HttpError as error:
             print(f"An error occurred: {error}")
-            return []
+            return None
 
     def shareFolder(
         self,

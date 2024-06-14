@@ -1,8 +1,8 @@
 import datetime
 
 
-METADATA_DEFAULT_INDEX = "N1"  # Define the cell where metadata will be found
-HEADERS_DEFAULT_ROW = 1  # Initial row position of headers
+METADATA_DEFAULT_INDEX = "A1"  # Define the cell where metadata will be found
+HEADERS_DEFAULT_ROW = 2  # Initial row position of headers
 
 # All the headers, Type columns are used to control index outcome and income flow
 HEADERS = [
@@ -25,7 +25,7 @@ BANK_COL = 7
 PIX_COL = 9
 
 # Initial row where data will be inserted in every empty columun
-DATA_ROW_DEFAULT = 2
+DATA_ROW_DEFAULT = HEADERS_DEFAULT_ROW + 1
 
 # Default values of income and outcome
 INCOME_DEFAULT = 0

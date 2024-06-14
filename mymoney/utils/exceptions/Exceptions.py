@@ -1,5 +1,5 @@
 class BaseExcpetion(Exception):
-    def __init__(self, message) -> None:
+    def __init__(self, message: str) -> None:
         self._message: str = message
 
     def message(self) -> str:
@@ -14,6 +14,12 @@ class FileAlreadyExistsException(BaseException):
 
 
 class FileNotFoundException(BaseException):
-    def __init__(self, file_id) -> None:
+    def __init__(self, file_id: str) -> None:
         self.message = f"File not found with given id. *ID: {file_id}."
+        super().__init__(self.message)
+
+
+class EmptyColumnException(BaseException):
+    def __init__(self, column: str) -> None:
+        self.message = f"The given column ** {column} **is empty."
         super().__init__(self.message)
