@@ -1,7 +1,7 @@
 from gspread.spreadsheet import Spreadsheet
 from gspread.client import Client
-from mymoney.repository.BaseRepository import BaseRepository
-from mymoney.utils.exceptions.Exceptions import (
+from mymoney.sheet.repository.BaseRepository import BaseRepository
+from mymoney.sheet.exceptions.Exceptions import (
     FileAlreadyExistsException,
     FileNotFoundException,
 )

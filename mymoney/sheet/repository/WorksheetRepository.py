@@ -1,12 +1,12 @@
 import json
-from mymoney.repository.BaseRepository import BaseRepository
+from mymoney.sheet.repository.BaseRepository import BaseRepository
 from gspread.cell import Cell
 from gspread.client import Client
 from gspread.worksheet import Worksheet
 from mymoney.contrib import settings
 
-from mymoney.utils.MetadataUtil import MetadataUtil
-from mymoney.utils.exceptions.Exceptions import EmptyColumnException
+from mymoney.sheet.MetadataUtil import MetadataUtil
+from mymoney.sheet.exceptions.Exceptions import EmptyColumnException
 
 
 class WorksheetRepository(BaseRepository):

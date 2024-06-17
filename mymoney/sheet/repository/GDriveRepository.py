@@ -2,7 +2,7 @@ import os
 from typing import List
 from googleapiclient.errors import HttpError
 from googleapiclient.discovery import Resource
-from mymoney.utils.exceptions.Exceptions import (
+from mymoney.sheet.exceptions.Exceptions import (
     FileAlreadyExistsException,
     FileNotFoundException,
 )

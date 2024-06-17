@@ -4,9 +4,9 @@ from gspread.worksheet import Worksheet
 from gspread.cell import Cell
 from gspread.exceptions import SpreadsheetNotFound
 
-from mymoney.repository.SpreadsheetRepository import SpreadsheetRepository
-from mymoney.repository.WorksheetRepository import WorksheetRepository
-from mymoney.utils.exceptions.Exceptions import (
+from mymoney.sheet.repository.SpreadsheetRepository import SpreadsheetRepository
+from mymoney.sheet.repository.WorksheetRepository import WorksheetRepository
+from mymoney.sheet.exceptions.Exceptions import (
     FileAlreadyExistsException,
     FileNotFoundException,
 )
