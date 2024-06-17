@@ -1,5 +1,4 @@
 from gspread.spreadsheet import Spreadsheet
-from gspread.client import Client
 from mymoney.sheet.repository.BaseRepository import BaseRepository
 from mymoney.sheet.exceptions.Exceptions import (
     FileAlreadyExistsException,
@@ -9,8 +8,8 @@ from gspread.exceptions import SpreadsheetNotFound
 
 
 class SpreadsheetRepository(BaseRepository):
-    def __init__(self, client: Client) -> None:
-        super().__init__(client)
+    def __init__(self) -> None:
+        super().__init__()
 
     def _createSpreadsheet(self, title: str, folder_id: str) -> str:
         """

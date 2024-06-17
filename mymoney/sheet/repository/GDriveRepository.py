@@ -1,14 +1,13 @@
-import os
 from typing import List
 from googleapiclient.errors import HttpError
 from googleapiclient.discovery import Resource
+from mymoney.contrib.settings import settings
+from mymoney.sheet.clients.GDriveClient import client
+
 from mymoney.sheet.exceptions.Exceptions import (
     FileAlreadyExistsException,
     FileNotFoundException,
 )
-from dotenv import load_dotenv
-
-load_dotenv()
 
 
 class GDriveRepository:
@@ -20,7 +19,7 @@ class GDriveRepository:
         _worksheet: The current worksheet
     """
 
-    def __init__(self, client: Resource) -> None:
+    def __init__(self) -> None:
         """
         Initializes the SheetController with the specified
         spreadsheet name and GspreadClient.
@@ -39,7 +38,6 @@ class GDriveRepository:
         :param parent_id: The ID of the parent folder (optional).
         :return: The metadata of the created folder.
         """
-
         if self.searchFolder(identifier=name):
             raise FileAlreadyExistsException(name)
 
@@ -59,7 +57,6 @@ class GDriveRepository:
             return folder
         except HttpError as error:
             print(f"An error occurred: {error}")
-            return None
 
     def updateFolder(self, folder_id: str, new_name: str) -> dict:
         """
@@ -73,8 +70,8 @@ class GDriveRepository:
         if self.searchFolder(identifier=new_name):
             raise FileAlreadyExistsException(new_name)
 
-        if not self.searchFolder(identifier=folder_id, search_by="id"):
-            raise FileNotFoundException(folder_id)
+        # Verify folder existence
+        self.searchFolder(identifier=folder_id, search_by="id")
 
         folder_metadata = {"name": new_name}
         try:
@@ -86,7 +83,6 @@ class GDriveRepository:
             return updated_folder
         except HttpError() as error:
             print(f"An error occurred: {error}")
-            return None
 
     def deleteFolder(self, folder_id: str) -> None:
         """
@@ -95,8 +91,7 @@ class GDriveRepository:
         :param folder_id: The ID of the folder to delete.
         """
 
-        if not self.searchFolder(identifier=folder_id, search_by="id"):
-            raise FileNotFoundException(folder_id)
+        self.searchFolder(identifier=folder_id, search_by="id")
 
         try:
             self._client.files().delete(fileId=folder_id).execute()
@@ -136,17 +131,18 @@ class GDriveRepository:
                 ):
                     folders = [file]
                 else:
-                    folders = None
+                    folders = []
 
+            if not folders:
+                raise FileNotFoundException(identifier)
             return folders
         except HttpError as error:
             print(f"An error occurred: {error}")
-            return None
 
     def shareFolder(
         self,
         folder_title: str,
-        email_address: str = os.environ.get("GSHEET_SERVICE_ACCOUNT_EMAIL"),
+        email_address: str = settings.GSHEET_SERVICE_ACCOUNT_EMAIL,
     ) -> str:
         """
         Garant folder acess permission and write role to another user.

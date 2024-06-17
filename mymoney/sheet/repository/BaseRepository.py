@@ -1,5 +1,7 @@
 from gspread.client import Client
 
+from mymoney.sheet.clients.GspreadClient import client
+
 
 class BaseRepository:
     """
@@ -9,6 +11,5 @@ class BaseRepository:
         _worksheet: The current worksheet
     """
 
-    def __init__(self, client: Client) -> None:
-        self._client: Client = client
-        self.nome = "aaa"
+    def __init__(self) -> None:
+        self._client: Client = client.getClient()

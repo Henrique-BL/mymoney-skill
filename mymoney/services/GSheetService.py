@@ -1,5 +1,4 @@
 from gspread.spreadsheet import Spreadsheet
-from gspread.client import Client
 from gspread.worksheet import Worksheet
 from gspread.cell import Cell
 from gspread.exceptions import SpreadsheetNotFound
@@ -21,7 +20,7 @@ class GSheetService:
         _worksheet: The current worksheet
     """
 
-    def __init__(self, client: Client) -> None:
+    def __init__(self) -> None:
         """
         Initializes the SheetController with the specified
         spreadsheet name and GspreadClient.
@@ -31,9 +30,8 @@ class GSheetService:
             client (GspreadClient): The client to interact with Google Sheets.
 
         """
-        self._client: Client = client
 
-        self._spreadsheet: SpreadsheetRepository = SpreadsheetRepository(client=client)
+        self._spreadsheet: SpreadsheetRepository = SpreadsheetRepository()
         self._worksheet: WorksheetRepository = None
         self._currentSpreadsheet: Spreadsheet = None
 
@@ -41,7 +39,7 @@ class GSheetService:
         self._currentSpreadsheet = spreadsheet
 
     def _setWorksheet(self, worksheet: Worksheet) -> None:
-        self._worksheet = WorksheetRepository(self._client, worksheet)
+        self._worksheet = WorksheetRepository(worksheet)
 
     def _newSpreadsheet(self, title: str, folder_id: str) -> str:
         """

@@ -1,7 +1,6 @@
 import json
 from mymoney.sheet.repository.BaseRepository import BaseRepository
 from gspread.cell import Cell
-from gspread.client import Client
 from gspread.worksheet import Worksheet
 from mymoney.contrib import settings
 
@@ -10,8 +9,8 @@ from mymoney.sheet.exceptions.Exceptions import EmptyColumnException
 
 
 class WorksheetRepository(BaseRepository):
-    def __init__(self, client: Client, worksheet: Worksheet) -> None:
-        super().__init__(client=client)
+    def __init__(self, worksheet: Worksheet) -> None:
+        super().__init__()
         self._worksheet: Worksheet = worksheet
 
     def _initialize(self) -> bool:
